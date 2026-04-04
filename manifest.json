@@ -1,15 +1,21 @@
 {
-  "manifest_version": 3,
-  "name": "save here",
-  "version": "1.2",
-  "description": "Save URLs to a specified bookmark folder",
+  "manifest_version": 2,
+  "name": "BookmarkThat",
+  "version": "2.0",
+  "description": "Save URLs to bookmarks and manage Firefox container tab unload/reload policies.",
   "icons": {
     "48": "icons/icon.png"
   },
   "permissions": [
     "activeTab",
     "storage",
-    "bookmarks"
+    "bookmarks",
+    "tabs",
+    "alarms",
+    "cookies",
+    "browsingData",
+    "contextualIdentities",
+    "<all_urls>"
   ],
   "background": {
     "scripts": ["background.js"]
@@ -23,5 +29,10 @@
   "options_ui": {
     "page": "settings.html",
     "open_in_tab": true
+  },
+  "applications": {
+    "gecko": {
+      "id": "bookmarkthat@local"
+    }
   }
 }

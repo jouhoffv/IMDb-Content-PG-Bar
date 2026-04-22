@@ -18,5 +18,8 @@
   height: 4px !important;
   z-index: 2147483647 !important;
   pointer-events: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity 180ms ease, background-color 180ms ease !important;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
 }

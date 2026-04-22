@@ -1,6 +1,8 @@
 (async function init() {
   const BAR_ID = "imdb-content-warning-bar";
   const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const TITLE_CACHE_KEY = "titleRatingCache";
+  const MAX_CACHED_TITLES = 300;
   const CATEGORY_ALIASES = {
     nudity: [
       "sex & nudity",
@@ -307,6 +309,23 @@
       return;
     }
 
+    const cachedRatings = await getCachedRatings(titleId);
+    if (cachedRatings) {
+      const cachedEvaluation = buildEvaluation(titleId, activeCategories, cachedRatings.ratings, cachedRatings.ratingSources);
+      if (cachedEvaluation) {
+        applyEvaluation(cachedEvaluation, true);
+        logDebug("cache-hit", {
+          titleId,
+          indicatorColor: cachedEvaluation.indicatorColor,
+          ratings: cachedEvaluation.ratings
+        });
+      } else {
+        logDebug("cache-hit-no-visible-match", { titleId });
+      }
+    } else {
+      logDebug("cache-miss", { titleId });
+    }
+
     const guideText = await loadGuideText(titleId);
     const ratings = extractRatings(guideText);
     const ratingSources = {};
@@ -324,14 +343,10 @@
       }
     }
 
-    const selectedRatings = activeCategories
-      .map((category) => ({
-        category,
-        severity: ratings[category]
-      }))
-      .filter((item) => Boolean(item.severity));
+    const evaluation = buildEvaluation(titleId, activeCategories, ratings, ratingSources);
+    await saveCachedRatings(titleId, ratings, ratingSources);
 
-    if (!selectedRatings.length) {
+    if (!evaluation) {
       lastEvaluation = {
         titleId,
         shouldShow: false,
@@ -339,7 +354,7 @@
         ratings,
         ratingSources
       };
-      setBarVisible(false);
+      setBarVisible(false, null, false);
       logDebug("refresh-no-ratings", {
         titleId,
         ratings,
@@ -348,31 +363,13 @@
       return;
     }
 
-    const highest = selectedRatings.reduce((best, current) => {
-      if (!best) {
-        return current;
-      }
-
-      return SEVERITY_META[current.severity].rank > SEVERITY_META[best.severity].rank
-        ? current
-        : best;
-    }, null);
-
-    const shouldShow = true;
-    lastEvaluation = {
-      titleId,
-      shouldShow,
-      indicatorColor: highest ? SEVERITY_META[highest.severity].label : null,
-      ratings,
-      ratingSources
-    };
-    setBarVisible(shouldShow, highest ? SEVERITY_META[highest.severity].color : null);
+    applyEvaluation(evaluation, false);
     logDebug("refresh-complete", {
-      titleId,
-      shouldShow,
-      indicatorColor: lastEvaluation.indicatorColor,
-      ratings,
-      ratingSources
+      titleId: evaluation.titleId,
+      shouldShow: evaluation.shouldShow,
+      indicatorColor: evaluation.indicatorColor,
+      ratings: evaluation.ratings,
+      ratingSources: evaluation.ratingSources
     });
   }
 
@@ -469,16 +466,32 @@
     return pattern ? pattern.test(guideText) : false;
   }
 
-  function setBarVisible(visible, color) {
+  function setBarVisible(visible, color, immediate) {
     const bar = document.getElementById(BAR_ID);
     if (bar) {
       if (color) {
-        bar.style.background = color;
+        bar.style.setProperty("background", color, "important");
       }
-      bar.style.setProperty("display", visible ? "block" : "none", "important");
+
+      if (immediate) {
+        bar.style.setProperty("transition", "none", "important");
+      } else {
+        bar.style.removeProperty("transition");
+      }
+
+      bar.style.setProperty("visibility", visible ? "visible" : "hidden", "important");
+      bar.style.setProperty("opacity", visible ? "1" : "0", "important");
+
+      if (immediate) {
+        requestAnimationFrame(() => {
+          bar.style.removeProperty("transition");
+        });
+      }
+
       logDebug("bar-visibility", {
         visible,
-        color: color || null
+        color: color || null,
+        immediate: Boolean(immediate)
       });
     }
   }
@@ -506,6 +519,90 @@
 
   function escapeRegex(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function buildEvaluation(titleId, activeCategories, ratings, ratingSources) {
+    const selectedRatings = activeCategories
+      .map((category) => ({
+        category,
+        severity: ratings[category]
+      }))
+      .filter((item) => Boolean(item.severity));
+
+    if (!selectedRatings.length) {
+      return null;
+    }
+
+    const highest = selectedRatings.reduce((best, current) => {
+      if (!best) {
+        return current;
+      }
+
+      return SEVERITY_META[current.severity].rank > SEVERITY_META[best.severity].rank
+        ? current
+        : best;
+    }, null);
+
+    return {
+      titleId,
+      shouldShow: true,
+      indicatorColor: highest ? SEVERITY_META[highest.severity].label : null,
+      ratings,
+      ratingSources,
+      color: highest ? SEVERITY_META[highest.severity].color : null
+    };
+  }
+
+  function applyEvaluation(evaluation, immediate) {
+    lastEvaluation = {
+      titleId: evaluation.titleId,
+      shouldShow: evaluation.shouldShow,
+      indicatorColor: evaluation.indicatorColor,
+      ratings: evaluation.ratings,
+      ratingSources: evaluation.ratingSources
+    };
+    setBarVisible(evaluation.shouldShow, evaluation.color, immediate);
+  }
+
+  async function getCachedRatings(titleId) {
+    try {
+      const stored = await browser.storage.local.get(TITLE_CACHE_KEY);
+      const cache = stored[TITLE_CACHE_KEY] || {};
+      return cache[titleId] || null;
+    } catch (error) {
+      logDebug("cache-read-failed", {
+        titleId,
+        error: String(error)
+      });
+      return null;
+    }
+  }
+
+  async function saveCachedRatings(titleId, ratings, ratingSources) {
+    try {
+      const stored = await browser.storage.local.get(TITLE_CACHE_KEY);
+      const cache = stored[TITLE_CACHE_KEY] || {};
+
+      cache[titleId] = {
+        ratings,
+        ratingSources,
+        updatedAt: Date.now()
+      };
+
+      if (Object.keys(cache).length > MAX_CACHED_TITLES) {
+        const sortedEntries = Object.entries(cache).sort((a, b) => (a[1].updatedAt || 0) - (b[1].updatedAt || 0));
+        delete cache[sortedEntries[0][0]];
+      }
+
+      await browser.storage.local.set({
+        [TITLE_CACHE_KEY]: cache
+      });
+    } catch (error) {
+      logDebug("cache-write-failed", {
+        titleId,
+        error: String(error)
+      });
+    }
   }
 
   async function getSettings() {

@@ -3,6 +3,12 @@
   const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const TITLE_CACHE_KEY = "titleRatingCache";
   const MAX_CACHED_TITLES = 300;
+  const LOGO_STYLE_ID = "imdb-logo-replacement-style";
+  const LOGO_URLS = {
+    green: browser.runtime.getURL("assets/logos/logo-green.svg"),
+    yellow: browser.runtime.getURL("assets/logos/logo-yellow.svg"),
+    red: browser.runtime.getURL("assets/logos/logo-red-banner.svg")
+  };
   const CATEGORY_ALIASES = {
     nudity: [
       "sex & nudity",
@@ -205,6 +211,8 @@
   });
 
   ensureBar();
+  ensureLogoReplacementStyles();
+  updateSiteLogo("red");
   attachObserver();
   await refreshIndicator();
 
@@ -481,6 +489,10 @@
         });
       }
 
+      if (visible && color) {
+        updateSiteLogo(colorToLogoKey(color));
+      }
+
       logDebug("bar-visibility", {
         visible,
         color: color || null,
@@ -556,6 +568,66 @@
       ratingSources: evaluation.ratingSources
     };
     setBarVisible(evaluation.shouldShow, evaluation.color, immediate);
+  }
+
+  function ensureLogoReplacementStyles() {
+    let style = document.getElementById(LOGO_STYLE_ID);
+    if (!style) {
+      style = document.createElement("style");
+      style.id = LOGO_STYLE_ID;
+      (document.head || document.documentElement).appendChild(style);
+    }
+
+    style.textContent = `
+      #home_img_holder {
+        position: relative !important;
+        background-image: var(--imdb-custom-logo-url) !important;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        background-size: contain !important;
+      }
+
+      #home_img_holder #home_img,
+      #home_img_holder img,
+      #home_img_holder svg,
+      #home_img_holder picture {
+        opacity: 0 !important;
+      }
+
+      #home_img_holder .alt_logo {
+        display: none !important;
+      }
+    `;
+  }
+
+  function updateSiteLogo(colorKey) {
+    const logoKey = LOGO_URLS[colorKey] ? colorKey : "red";
+    const holder = document.getElementById("home_img_holder");
+    if (!holder) {
+      logDebug("logo-holder-missing", {
+        colorKey: logoKey
+      });
+      return;
+    }
+
+    holder.style.setProperty("--imdb-custom-logo-url", `url("${LOGO_URLS[logoKey]}")`);
+    holder.style.setProperty("background-image", `url("${LOGO_URLS[logoKey]}")`, "important");
+    logDebug("logo-updated", {
+      colorKey: logoKey,
+      url: LOGO_URLS[logoKey]
+    });
+  }
+
+  function colorToLogoKey(color) {
+    switch ((color || "").toLowerCase()) {
+      case "#2ea043":
+        return "green";
+      case "#e0a100":
+        return "yellow";
+      case "#cf222e":
+      default:
+        return "red";
+    }
   }
 
   async function getCachedRatings(titleId) {

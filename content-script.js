@@ -1,12 +1,38 @@
 (async function init() {
   const BAR_ID = "imdb-content-warning-bar";
   const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const CATEGORY_PATTERNS = {
-    nudity: /sex\s*(?:&|and)\s*nudity(?:\s*:)?\s*(none|mild|moderate|severe)/i,
-    violence: /violence\s*(?:&|and)\s*gore(?:\s*:)?\s*(none|mild|moderate|severe)/i,
-    profanity: /profanity(?:\s*:)?\s*(none|mild|moderate|severe)/i,
-    alcohol: /alcohol,\s*drugs\s*(?:&|and)\s*smoking(?:\s*:)?\s*(none|mild|moderate|severe)/i,
-    frightening: /frightening\s*(?:&|and)\s*intense\s*scenes(?:\s*:)?\s*(none|mild|moderate|severe)/i
+  const CATEGORY_ALIASES = {
+    nudity: [
+      "sex & nudity",
+      "sex and nudity",
+      "sex und nacktheit"
+    ],
+    violence: [
+      "violence & gore",
+      "violence and gore",
+      "gewalt und blut"
+    ],
+    profanity: [
+      "profanity",
+      "vulgäre ausdrücke",
+      "vulgare ausdrucke"
+    ],
+    alcohol: [
+      "alcohol, drugs & smoking",
+      "alcohol, drugs and smoking",
+      "alkohol, drogen und rauchen"
+    ],
+    frightening: [
+      "frightening & intense scenes",
+      "frightening and intense scenes",
+      "erschreckende und heftige szenen"
+    ]
+  };
+  const SEVERITY_ALIASES = {
+    none: ["none", "keine"],
+    mild: ["mild", "leicht"],
+    moderate: ["moderate", "moderat"],
+    severe: ["severe", "stark"]
   };
   const SEVERITY_META = {
     none: { rank: 0, color: "#2ea043", label: "green" },
@@ -262,11 +288,20 @@
 
   function extractRatings(guideText) {
     const ratings = {};
+    const severityPattern = Object.values(SEVERITY_ALIASES)
+      .flat()
+      .map((value) => escapeRegex(value))
+      .join("|");
 
-    for (const [category, pattern] of Object.entries(CATEGORY_PATTERNS)) {
-      const match = guideText.match(pattern);
-      if (match?.[1]) {
-        ratings[category] = match[1].toLowerCase();
+    for (const [category, aliases] of Object.entries(CATEGORY_ALIASES)) {
+      for (const alias of aliases) {
+        const pattern = new RegExp(`${escapeRegex(alias)}(?:\\s*:)?\\s*(${severityPattern})`, "i");
+        const match = guideText.match(pattern);
+
+        if (match?.[1]) {
+          ratings[category] = normalizeSeverity(match[1]);
+          break;
+        }
       }
     }
 
@@ -299,6 +334,22 @@
 
   function normalizeText(text) {
     return text.replace(/\s+/g, " ").trim().toLowerCase();
+  }
+
+  function normalizeSeverity(rawSeverity) {
+    const normalized = normalizeText(rawSeverity);
+
+    for (const [severity, aliases] of Object.entries(SEVERITY_ALIASES)) {
+      if (aliases.some((alias) => normalizeText(alias) === normalized)) {
+        return severity;
+      }
+    }
+
+    return normalized;
+  }
+
+  function escapeRegex(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   async function getSettings() {

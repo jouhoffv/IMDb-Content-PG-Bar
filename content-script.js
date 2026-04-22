@@ -5,34 +5,157 @@
     nudity: [
       "sex & nudity",
       "sex and nudity",
-      "sex und nacktheit"
+      "sex und nacktheit",
+      "sexe et nudité",
+      "sexo y desnudez",
+      "sesso e nudità",
+      "sexo e nudez",
+      "seks en naaktheid",
+      "seks i nagość",
+      "sex och nakenhet",
+      "sex og nøgenhed",
+      "sex og nakenhet",
+      "seksi ja alastomuus",
+      "sex a nahota",
+      "sex și nuditate",
+      "szex és meztelenség"
     ],
     violence: [
       "violence & gore",
       "violence and gore",
-      "gewalt und blut"
+      "gewalt und blut",
+      "violence et scènes difficiles",
+      "violencia y gore",
+      "violenza e sangue",
+      "violência e gore",
+      "geweld en gore",
+      "przemoc i drastyczne sceny",
+      "våld och blod",
+      "vold og blod",
+      "väkivalta ja veri",
+      "násilí a krev",
+      "violență și scene sângeroase",
+      "erőszak és vér"
     ],
     profanity: [
       "profanity",
       "vulgäre ausdrücke",
-      "vulgare ausdrucke"
+      "vulgare ausdrucke",
+      "grossièretés",
+      "palabrotas",
+      "turpiloquio",
+      "linguagem imprópria",
+      "grof taalgebruik",
+      "wulgarny język",
+      "svordomar",
+      "bandeord",
+      "kirosanat",
+      "vulgarity",
+      "vulgarități",
+      "trágár beszéd"
     ],
     alcohol: [
       "alcohol, drugs & smoking",
       "alcohol, drugs and smoking",
-      "alkohol, drogen und rauchen"
+      "alkohol, drogen und rauchen",
+      "alcool, drogues et tabac",
+      "alcohol, drogas y tabaco",
+      "alcol, droghe e fumo",
+      "álcool, drogas e tabaco",
+      "alcohol, drugs en roken",
+      "alkohol, narkotyki i palenie",
+      "alkohol, droger och rökning",
+      "alkohol, stoffer og rygning",
+      "alkoholi, huumeet ja tupakointi",
+      "alkohol, drogy a kouření",
+      "alcool, droguri și fumat",
+      "alkohol, drogok és dohányzás"
     ],
     frightening: [
       "frightening & intense scenes",
       "frightening and intense scenes",
-      "erschreckende und heftige szenen"
+      "erschreckende und heftige szenen",
+      "scènes effrayantes et intenses",
+      "escenas aterradoras e intensas",
+      "scene intense e spaventose",
+      "cenas assustadoras e intensas",
+      "enge of intense scènes",
+      "sceny przerażające i intensywne",
+      "skrämmande och intensiva scener",
+      "skræmmende og intense scener",
+      "skremmende og intense scener",
+      "pelottavat ja intensiiviset kohtaukset",
+      "děsivé a intenzivní scény",
+      "scene înfricoșătoare și intense",
+      "ijesztő és intenzív jelenetek"
     ]
   };
   const SEVERITY_ALIASES = {
-    none: ["none", "keine"],
-    mild: ["mild", "leicht"],
-    moderate: ["moderate", "moderat"],
-    severe: ["severe", "stark"]
+    none: [
+      "none",
+      "keine",
+      "aucune",
+      "ninguno",
+      "nessuno",
+      "nenhum",
+      "geen",
+      "brak",
+      "ingen",
+      "intet",
+      "ei mitään",
+      "žádné",
+      "niciuna",
+      "nincs"
+    ],
+    mild: [
+      "mild",
+      "leicht",
+      "léger",
+      "leve",
+      "ligero",
+      "lieve",
+      "légère",
+      "lieve",
+      "łagodne",
+      "lindrig",
+      "mildt",
+      "lievä",
+      "mírné",
+      "ușoară",
+      "enyhe"
+    ],
+    moderate: [
+      "moderate",
+      "moderat",
+      "modérée",
+      "moderado",
+      "moderata",
+      "moderado",
+      "matig",
+      "umiarkowane",
+      "måttlig",
+      "moderat",
+      "kohtalainen",
+      "střední",
+      "moderată",
+      "közepes"
+    ],
+    severe: [
+      "severe",
+      "stark",
+      "sévère",
+      "grave",
+      "severo",
+      "forte",
+      "ernstig",
+      "poważne",
+      "stark",
+      "alvorlig",
+      "vakava",
+      "závažné",
+      "severă",
+      "súlyos"
+    ]
   };
   const SEVERITY_META = {
     none: { rank: 0, color: "#2ea043", label: "green" },
@@ -305,6 +428,39 @@
       }
     }
 
+    const orderedFallback = extractRatingsByOrder(guideText);
+    for (const [category, severity] of Object.entries(orderedFallback)) {
+      if (!ratings[category]) {
+        ratings[category] = severity;
+      }
+    }
+
+    return ratings;
+  }
+
+  function extractRatingsByOrder(guideText) {
+    const labelsInOrder = [
+      "nudity",
+      "violence",
+      "profanity",
+      "alcohol",
+      "frightening"
+    ];
+    const allSeverityAliases = Object.values(SEVERITY_ALIASES).flat();
+    const severityPattern = allSeverityAliases.map((value) => escapeRegex(value)).join("|");
+    const regex = new RegExp(`(${severityPattern})`, "gi");
+    const matches = Array.from(guideText.matchAll(regex))
+      .map((match) => normalizeSeverity(match[1]))
+      .filter((value) => value in SEVERITY_META);
+
+    if (matches.length < 5) {
+      return {};
+    }
+
+    const ratings = {};
+    for (let index = 0; index < labelsInOrder.length; index += 1) {
+      ratings[labelsInOrder[index]] = matches[index];
+    }
     return ratings;
   }
 

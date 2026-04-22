@@ -1,5 +1,6 @@
 (async function init() {
   const BAR_ID = "imdb-content-warning-bar";
+  const HIDE_STYLE_ID = "imdb-content-warning-hide-style";
   const GUIDE_PATH_PATTERN = /\/parentalguide(\/|\?|$)/i;
   const CATEGORY_PATTERNS = {
     nudity: /sex\s*(?:&|and)\s*nudity\s*:\s*(none|mild|moderate|severe)/i,
@@ -48,6 +49,7 @@
   });
 
   ensureBar();
+  ensureHideStyles();
   attachObserver();
   await refreshIndicator();
 
@@ -72,6 +74,29 @@
       boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.08)"
     });
     document.documentElement.appendChild(bar);
+  }
+
+  function ensureHideStyles() {
+    if (document.getElementById(HIDE_STYLE_ID)) {
+      return;
+    }
+
+    const style = document.createElement("style");
+    style.id = HIDE_STYLE_ID;
+    style.textContent = `
+      [class*="inline20"],
+      [class*="responsive_wrapper"],
+      [data-testid*="inline20"],
+      [data-testid*="responsive-wrapper"],
+      [id*="inline20"],
+      .ipc-ad-slot,
+      .advertisement,
+      [aria-label="advertisement"] {
+        display: none !important;
+        visibility: hidden !important;
+      }
+    `;
+    document.documentElement.appendChild(style);
   }
 
   function attachObserver() {

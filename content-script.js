@@ -209,27 +209,20 @@
   await refreshIndicator();
 
   function ensureBar() {
-    if (document.getElementById(BAR_ID)) {
-      return;
+    let bar = document.getElementById(BAR_ID);
+    if (bar) {
+      return bar;
     }
 
-    const bar = document.createElement("div");
+    bar = document.createElement("div");
     bar.id = BAR_ID;
     bar.setAttribute("aria-hidden", "true");
-    Object.assign(bar.style, {
-      position: "fixed",
-      top: "0",
-      left: "0",
-      width: "100%",
-      height: "4px",
-      background: "#cf222e",
-      zIndex: "2147483647",
-      pointerEvents: "none",
-      display: "none",
-      boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.08)"
+    const parent = document.body || document.documentElement;
+    parent.appendChild(bar);
+    logDebug("bar-created", {
+      parentTag: parent.tagName
     });
-    document.documentElement.appendChild(bar);
-    logDebug("bar-created");
+    return bar;
   }
 
   function attachObserver() {
@@ -467,7 +460,7 @@
   }
 
   function setBarVisible(visible, color, immediate) {
-    const bar = document.getElementById(BAR_ID);
+    const bar = ensureBar();
     if (bar) {
       if (color) {
         bar.style.setProperty("background", color, "important");
@@ -491,7 +484,8 @@
       logDebug("bar-visibility", {
         visible,
         color: color || null,
-        immediate: Boolean(immediate)
+        immediate: Boolean(immediate),
+        connected: bar.isConnected
       });
     }
   }

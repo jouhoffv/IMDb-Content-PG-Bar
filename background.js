@@ -43,7 +43,11 @@ browser.storage.onChanged.addListener((changes, areaName) => {
 
 async function notifyAllImdbTabs(settings) {
   const tabs = await browser.tabs.query({
-    url: ["*://www.imdb.com/title/*", "*://m.imdb.com/title/*"]
+    url: [
+      "*://www.imdb.com/title/*",
+      "*://www.imdb.com/*/title/*",
+      "*://m.imdb.com/title/*"
+    ]
   });
 
   await Promise.all(

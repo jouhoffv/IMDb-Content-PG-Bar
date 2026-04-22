@@ -1,7 +1,6 @@
 (async function init() {
   const BAR_ID = "imdb-content-warning-bar";
   const HIDE_STYLE_ID = "imdb-content-warning-hide-style";
-  const GUIDE_PATH_PATTERN = /\/parentalguide(\/|\?|$)/i;
   const CATEGORY_PATTERNS = {
     nudity: /sex\s*(?:&|and)\s*nudity\s*:\s*(none|mild|moderate|severe)/i,
     violence: /violence\s*(?:&|and)\s*gore\s*:\s*(none|mild|moderate|severe)/i,
@@ -221,11 +220,7 @@
   }
 
   async function loadGuideText(titleId) {
-    if (GUIDE_PATH_PATTERN.test(window.location.pathname)) {
-      return normalizeText(document.body?.innerText || "");
-    }
-
-    const url = `${window.location.origin}/title/${titleId}/parentalguide/`;
+    const url = `https://www.imdb.com/title/${titleId}/parentalguide/`;
     const response = await fetch(url, {
       credentials: "same-origin"
     });

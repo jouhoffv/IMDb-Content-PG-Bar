@@ -73,7 +73,7 @@ async function renderPageState() {
     currentWindow: true
   });
 
-  if (!tab?.id || !/https?:\/\/(www|m)\.imdb\.com\/title\//i.test(tab.url || "")) {
+  if (!tab?.id || !/https?:\/\/(www|m)\.imdb\.com\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?title\//i.test(tab.url || "")) {
     pageStatus.textContent = "Open an IMDb movie or TV show page to evaluate it.";
     return;
   }

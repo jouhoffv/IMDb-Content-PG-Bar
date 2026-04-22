@@ -7,6 +7,7 @@
     "storage",
     "tabs",
     "*://www.imdb.com/title/*",
+    "*://www.imdb.com/*/title/*",
     "*://m.imdb.com/title/*"
   ],
   "browser_specific_settings": {
@@ -32,6 +33,7 @@
     {
       "matches": [
         "*://www.imdb.com/title/*",
+        "*://www.imdb.com/*/title/*",
         "*://m.imdb.com/title/*"
       ],
       "js": [

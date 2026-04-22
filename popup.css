@@ -81,6 +81,10 @@ input[type="checkbox"] {
   gap: 10px;
 }
 
+.debug-actions {
+  margin-top: -4px;
+}
+
 button {
   flex: 1;
   border: 1px solid transparent;

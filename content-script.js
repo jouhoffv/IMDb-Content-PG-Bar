@@ -1,5 +1,6 @@
 (async function init() {
   const BAR_ID = "imdb-content-warning-bar";
+  const SESSION_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const CATEGORY_PATTERNS = {
     nudity: /sex\s*(?:&|and)\s*nudity(?:\s*:)?\s*(none|mild|moderate|severe)/i,
     violence: /violence\s*(?:&|and)\s*gore(?:\s*:)?\s*(none|mild|moderate|severe)/i,
@@ -22,6 +23,10 @@
   };
 
   const settingsPromise = getSettings();
+  logDebug("init", {
+    url: window.location.href,
+    readyState: document.readyState
+  });
 
   let currentSettings = await settingsPromise;
   let observer = null;
@@ -73,6 +78,7 @@
       boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.08)"
     });
     document.documentElement.appendChild(bar);
+    logDebug("bar-created");
   }
 
   function attachObserver() {
@@ -89,6 +95,8 @@
       subtree: true
     });
 
+    logDebug("observer-attached");
+
     window.addEventListener("popstate", scheduleRefresh);
     window.addEventListener("hashchange", scheduleRefresh);
   }
@@ -103,8 +111,17 @@
   }
 
   async function refreshIndicator() {
+    logDebug("refresh-start", {
+      enabled: currentSettings?.enabled,
+      categories: currentSettings?.categories,
+      useKeywordFallback: currentSettings?.useKeywordFallback,
+      titleId: extractTitleId(window.location.pathname),
+      adNodes: countAdNodes()
+    });
+
     if (!currentSettings?.enabled) {
       setBarVisible(false);
+      logDebug("refresh-disabled");
       return;
     }
 
@@ -121,6 +138,7 @@
         ratingSources: {}
       };
       setBarVisible(false);
+      logDebug("refresh-no-active-categories");
       return;
     }
 
@@ -134,6 +152,9 @@
         ratingSources: {}
       };
       setBarVisible(false);
+      logDebug("refresh-no-title-id", {
+        pathname: window.location.pathname
+      });
       return;
     }
 
@@ -170,6 +191,11 @@
         ratingSources
       };
       setBarVisible(false);
+      logDebug("refresh-no-ratings", {
+        titleId,
+        ratings,
+        ratingSources
+      });
       return;
     }
 
@@ -192,19 +218,43 @@
       ratingSources
     };
     setBarVisible(shouldShow, highest ? SEVERITY_META[highest.severity].color : null);
+    logDebug("refresh-complete", {
+      titleId,
+      shouldShow,
+      indicatorColor: lastEvaluation.indicatorColor,
+      ratings,
+      ratingSources
+    });
   }
 
   async function loadGuideText(titleId) {
     const url = `https://www.imdb.com/title/${titleId}/parentalguide/`;
+    logDebug("guide-fetch-start", {
+      titleId,
+      url
+    });
     const response = await fetch(url, {
       credentials: "same-origin"
     });
 
     if (!response.ok) {
+      logDebug("guide-fetch-failed", {
+        titleId,
+        status: response.status
+      });
       throw new Error(`Unable to fetch parental guide: ${response.status}`);
     }
 
     const html = await response.text();
+    const challengeDetected =
+      /verify that you'?re not a robot/i.test(html) ||
+      /javascript is disabled/i.test(html);
+    logDebug("guide-fetch-success", {
+      titleId,
+      status: response.status,
+      htmlLength: html.length,
+      challengeDetected
+    });
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
     return normalizeText(doc.body?.innerText || "");
@@ -234,7 +284,11 @@
       if (color) {
         bar.style.background = color;
       }
-      bar.style.display = visible ? "block" : "none";
+      bar.style.setProperty("display", visible ? "block" : "none", "important");
+      logDebug("bar-visibility", {
+        visible,
+        color: color || null
+      });
     }
   }
 
@@ -249,8 +303,13 @@
 
   async function getSettings() {
     try {
-      return await browser.runtime.sendMessage({ type: "get-settings" });
+      const settings = await browser.runtime.sendMessage({ type: "get-settings" });
+      logDebug("settings-loaded", settings);
+      return settings;
     } catch (error) {
+      logDebug("settings-fallback", {
+        error: String(error)
+      });
       return {
         enabled: true,
         useKeywordFallback: false,
@@ -262,6 +321,27 @@
           frightening: false
         }
       };
+    }
+  }
+
+  function countAdNodes() {
+    return document.querySelectorAll(
+      '[class*="inline20"], [class*="responsive_wrapper"], [data-testid*="inline20"], [data-testid*="responsive-wrapper"], [id*="inline20"], .ipc-ad-slot, .advertisement, [aria-label="advertisement"]'
+    ).length;
+  }
+
+  function logDebug(step, details = {}) {
+    try {
+      browser.runtime.sendMessage({
+        type: "append-debug-log",
+        entry: {
+          sessionId: SESSION_ID,
+          step,
+          details
+        }
+      });
+    } catch (error) {
+      // Ignore logging failures.
     }
   }
 })();

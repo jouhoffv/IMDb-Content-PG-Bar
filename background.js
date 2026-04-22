@@ -9,6 +9,8 @@ const DEFAULT_SETTINGS = {
     frightening: false
   }
 };
+const DEBUG_LOG_KEY = "debugLogs";
+const MAX_DEBUG_LOGS = 250;
 
 browser.runtime.onInstalled.addListener(async () => {
   const stored = await browser.storage.local.get("settings");
@@ -27,6 +29,21 @@ browser.runtime.onMessage.addListener(async (message) => {
     const settings = normalizeSettings(message.settings);
     await browser.storage.local.set({ settings });
     await notifyAllImdbTabs(settings);
+    return { ok: true };
+  }
+
+  if (message?.type === "append-debug-log") {
+    await appendDebugLog(message.entry);
+    return { ok: true };
+  }
+
+  if (message?.type === "get-debug-logs") {
+    const stored = await browser.storage.local.get(DEBUG_LOG_KEY);
+    return stored[DEBUG_LOG_KEY] || [];
+  }
+
+  if (message?.type === "clear-debug-logs") {
+    await browser.storage.local.set({ [DEBUG_LOG_KEY]: [] });
     return { ok: true };
   }
 
@@ -79,4 +96,23 @@ function normalizeSettings(settings) {
       frightening: Boolean(settings?.categories?.frightening)
     }
   };
+}
+
+async function appendDebugLog(entry) {
+  if (!entry || typeof entry !== "object") {
+    return;
+  }
+
+  const stored = await browser.storage.local.get(DEBUG_LOG_KEY);
+  const next = Array.isArray(stored[DEBUG_LOG_KEY]) ? stored[DEBUG_LOG_KEY] : [];
+  next.push({
+    ts: new Date().toISOString(),
+    ...entry
+  });
+
+  if (next.length > MAX_DEBUG_LOGS) {
+    next.splice(0, next.length - MAX_DEBUG_LOGS);
+  }
+
+  await browser.storage.local.set({ [DEBUG_LOG_KEY]: next });
 }

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <title>IMDb Content Warning Bar</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main class="page">
+      <section class="panel">
+        <header class="header">
+          <div>
+            <p class="eyebrow">Firefox Extension Settings</p>
+            <h1>IMDb Content Warning Bar</h1>
+            <p class="intro">
+              Use IMDb's own Parents Guide ratings to color the top bar for the categories you care about.
+            </p>
+          </div>
+        </header>
+
+        <form id="settings-form">
+          <section class="section">
+            <h2>General</h2>
+            <label class="toggle card">
+              <input id="enabled" type="checkbox">
+              <span>
+                <strong>Enable colored top bar</strong>
+                <small>Show a status bar on IMDb title pages.</small>
+              </span>
+            </label>
+
+            <label class="toggle card">
+              <input id="useKeywordFallback" type="checkbox">
+              <span>
+                <strong>Include keyword fallback</strong>
+                <small>Use the older keyword rules when IMDb severity text is missing.</small>
+              </span>
+            </label>
+          </section>
+
+          <fieldset class="section categories">
+            <legend>
+              <span>Parents Guide Categories</span>
+              <small>
+                Green for None or Mild, yellow for Moderate, red for Severe. The highest selected rating wins.
+              </small>
+            </legend>
+
+            <label class="toggle row">
+              <input id="nudity" type="checkbox">
+              <span>
+                <strong>Nudity</strong>
+                <small>IMDb: Sex &amp; Nudity</small>
+              </span>
+            </label>
+
+            <label class="toggle row">
+              <input id="violence" type="checkbox">
+              <span>
+                <strong>Violence</strong>
+                <small>IMDb: Violence &amp; Gore</small>
+              </span>
+            </label>
+
+            <label class="toggle row">
+              <input id="profanity" type="checkbox">
+              <span>
+                <strong>Profanity</strong>
+                <small>IMDb: Profanity</small>
+              </span>
+            </label>
+
+            <label class="toggle row">
+              <input id="alcohol" type="checkbox">
+              <span>
+                <strong>Alcohol</strong>
+                <small>IMDb: Alcohol, Drugs &amp; Smoking</small>
+              </span>
+            </label>
+
+            <label class="toggle row">
+              <input id="frightening" type="checkbox">
+              <span>
+                <strong>Frightening Scenes</strong>
+                <small>IMDb: Frightening &amp; Intense Scenes</small>
+              </span>
+            </label>
+          </fieldset>
+
+          <div class="actions">
+            <button type="submit">Save Settings</button>
+            <p id="status" class="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+  </html>

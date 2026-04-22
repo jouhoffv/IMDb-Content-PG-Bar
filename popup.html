@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <title>IMDb Content Warning Bar</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup">
+      <header class="header">
+        <h1>IMDb Warning Bar</h1>
+        <p id="page-status" class="page-status">Checking this page...</p>
+      </header>
+
+      <form id="popup-form" class="form">
+        <label class="toggle major">
+          <input id="enabled" type="checkbox">
+          <span>Enable colored top bar</span>
+        </label>
+
+        <label class="toggle">
+          <input id="useKeywordFallback" type="checkbox">
+          <span>Use keyword fallback</span>
+        </label>
+
+        <div class="group">
+          <label class="toggle">
+            <input id="nudity" type="checkbox">
+            <span>Nudity</span>
+          </label>
+
+          <label class="toggle">
+            <input id="violence" type="checkbox">
+            <span>Violence</span>
+          </label>
+
+          <label class="toggle">
+            <input id="profanity" type="checkbox">
+            <span>Profanity</span>
+          </label>
+
+          <label class="toggle">
+            <input id="alcohol" type="checkbox">
+            <span>Alcohol</span>
+          </label>
+
+          <label class="toggle">
+            <input id="frightening" type="checkbox">
+            <span>Frightening Scenes</span>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Save</button>
+          <button id="open-options" type="button" class="secondary">Full Settings</button>
+        </div>
+      </form>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+  </html>

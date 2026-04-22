@@ -18,6 +18,8 @@
 body {
   margin: 0;
   width: 340px;
+  max-height: 560px;
+  overflow-y: auto;
   font: message-box;
   color: var(--text);
   background: var(--bg);
@@ -82,7 +84,15 @@ input[type="checkbox"] {
 }
 
 .debug-actions {
-  margin-top: -4px;
+  margin-bottom: 14px;
+}
+
+.debug-actions-top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-bottom: 4px;
+  background: var(--bg);
 }
 
 button {

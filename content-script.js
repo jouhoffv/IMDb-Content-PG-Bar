@@ -5,9 +5,9 @@
   const MAX_CACHED_TITLES = 300;
   const LOGO_STYLE_ID = "imdb-logo-replacement-style";
   const LOGO_URLS = {
-    green: browser.runtime.getURL("assets/logos/logo-green.svg"),
-    yellow: browser.runtime.getURL("assets/logos/logo-yellow.svg"),
-    red: browser.runtime.getURL("assets/logos/logo-red-banner.svg")
+    green: browser.runtime.getURL("assets/logos/Green.svg"),
+    yellow: browser.runtime.getURL("assets/logos/Yellow.svg"),
+    red: browser.runtime.getURL("assets/logos/Red.svg")
   };
   const CATEGORY_ALIASES = {
     nudity: [

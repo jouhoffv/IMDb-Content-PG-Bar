@@ -36,6 +36,9 @@
         "*://www.imdb.com/*/title/*",
         "*://m.imdb.com/title/*"
       ],
+      "css": [
+        "content.css"
+      ],
       "js": [
         "content-script.js"
       ],

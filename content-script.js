@@ -1,12 +1,11 @@
 (async function init() {
   const BAR_ID = "imdb-content-warning-bar";
-  const HIDE_STYLE_ID = "imdb-content-warning-hide-style";
   const CATEGORY_PATTERNS = {
-    nudity: /sex\s*(?:&|and)\s*nudity\s*:\s*(none|mild|moderate|severe)/i,
-    violence: /violence\s*(?:&|and)\s*gore\s*:\s*(none|mild|moderate|severe)/i,
-    profanity: /profanity\s*:\s*(none|mild|moderate|severe)/i,
-    alcohol: /alcohol,\s*drugs\s*(?:&|and)\s*smoking\s*:\s*(none|mild|moderate|severe)/i,
-    frightening: /frightening\s*(?:&|and)\s*intense\s*scenes\s*:\s*(none|mild|moderate|severe)/i
+    nudity: /sex\s*(?:&|and)\s*nudity(?:\s*:)?\s*(none|mild|moderate|severe)/i,
+    violence: /violence\s*(?:&|and)\s*gore(?:\s*:)?\s*(none|mild|moderate|severe)/i,
+    profanity: /profanity(?:\s*:)?\s*(none|mild|moderate|severe)/i,
+    alcohol: /alcohol,\s*drugs\s*(?:&|and)\s*smoking(?:\s*:)?\s*(none|mild|moderate|severe)/i,
+    frightening: /frightening\s*(?:&|and)\s*intense\s*scenes(?:\s*:)?\s*(none|mild|moderate|severe)/i
   };
   const SEVERITY_META = {
     none: { rank: 0, color: "#2ea043", label: "green" },
@@ -23,7 +22,6 @@
   };
 
   const settingsPromise = getSettings();
-  ensureHideStyles();
 
   let currentSettings = await settingsPromise;
   let observer = null;
@@ -75,29 +73,6 @@
       boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.08)"
     });
     document.documentElement.appendChild(bar);
-  }
-
-  function ensureHideStyles() {
-    if (document.getElementById(HIDE_STYLE_ID)) {
-      return;
-    }
-
-    const style = document.createElement("style");
-    style.id = HIDE_STYLE_ID;
-    style.textContent = `
-      [class*="inline20"],
-      [class*="responsive_wrapper"],
-      [data-testid*="inline20"],
-      [data-testid*="responsive-wrapper"],
-      [id*="inline20"],
-      .ipc-ad-slot,
-      .advertisement,
-      [aria-label="advertisement"] {
-        display: none !important;
-        visibility: hidden !important;
-      }
-    `;
-    document.documentElement.appendChild(style);
   }
 
   function attachObserver() {

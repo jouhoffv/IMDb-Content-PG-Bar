@@ -1,0 +1,23 @@
+[class*="inline20"],
+[class*="responsive_wrapper"],
+[data-testid*="inline20"],
+[data-testid*="responsive-wrapper"],
+[id*="inline20"],
+.ipc-ad-slot,
+.advertisement,
+[aria-label="advertisement"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+#imdb-content-warning-bar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 4px !important;
+  z-index: 2147483647 !important;
+  pointer-events: none !important;
+  display: none !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
+}

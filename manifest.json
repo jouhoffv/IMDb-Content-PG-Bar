@@ -1,8 +1,14 @@
 {
   "manifest_version": 2,
   "name": "IMDb Content Warning Bar",
-  "version": "1.0.0",
-  "description": "Shows a thin red bar on IMDb title pages when selected parental guide categories are present.",
+  "version": "1.1.0",
+  "description": "Color-codes IMDb title pages using Parents Guide ratings.",
+  "author": "Victor",
+  "homepage_url": "https://github.com/jouhoffv",
+  "icons": {
+    "48": "assets/logos/imdb_banner.png",
+    "96": "assets/logos/imdb_banner.png"
+  },
   "permissions": [
     "storage",
     "tabs",
@@ -23,6 +29,9 @@
   },
   "browser_action": {
     "default_title": "IMDb Content Warning Bar",
+    "default_icon": {
+      "48": "assets/logos/imdb_banner.png"
+    },
     "default_popup": "popup.html"
   },
   "options_ui": {

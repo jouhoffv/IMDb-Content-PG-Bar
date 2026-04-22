@@ -83,18 +83,6 @@ input[type="checkbox"] {
   gap: 10px;
 }
 
-.debug-actions {
-  margin-bottom: 14px;
-}
-
-.debug-actions-top {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding-bottom: 4px;
-  background: var(--bg);
-}
-
 button {
   flex: 1;
   border: 1px solid transparent;

@@ -14,8 +14,6 @@ const ids = ["enabled", "useKeywordFallback", "nudity", "violence", "profanity",
 const pageStatus = document.getElementById("page-status");
 const form = document.getElementById("popup-form");
 const openOptionsButton = document.getElementById("open-options");
-const copyDebugLogButton = document.getElementById("copy-debug-log");
-const clearDebugLogButton = document.getElementById("clear-debug-log");
 
 init().catch(() => {
   pageStatus.textContent = "Unable to read extension state.";
@@ -34,23 +32,6 @@ form.addEventListener("submit", async (event) => {
 
 openOptionsButton.addEventListener("click", () => {
   browser.runtime.openOptionsPage();
-});
-
-copyDebugLogButton.addEventListener("click", async () => {
-  const logs = await browser.runtime.sendMessage({
-    type: "get-debug-logs"
-  });
-  const text = JSON.stringify(logs, null, 2);
-
-  await navigator.clipboard.writeText(text);
-  pageStatus.textContent = "Debug log copied to clipboard.";
-});
-
-clearDebugLogButton.addEventListener("click", async () => {
-  await browser.runtime.sendMessage({
-    type: "clear-debug-logs"
-  });
-  pageStatus.textContent = "Debug log cleared.";
 });
 
 async function init() {

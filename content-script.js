@@ -23,7 +23,10 @@
     frightening: /\b(frightening|intense scenes)\b/i
   };
 
-  let currentSettings = await getSettings();
+  const settingsPromise = getSettings();
+  ensureHideStyles();
+
+  let currentSettings = await settingsPromise;
   let observer = null;
   let refreshTimer = null;
   let lastEvaluation = {
@@ -49,7 +52,6 @@
   });
 
   ensureBar();
-  ensureHideStyles();
   attachObserver();
   await refreshIndicator();
 

@@ -6,9 +6,9 @@
   "author": "Victor",
   "homepage_url": "https://github.com/jouhoffv",
   "icons": {
-    "48": "assets/logos/imdb_banner.png",
-    "96": "assets/logos/imdb_banner.png",
-    "128": "assets/logos/imdb_banner.png"
+    "48": "assets/logos/imdb_banner_48.png",
+    "96": "assets/logos/imdb_banner_96.png",
+    "128": "assets/logos/imdb_banner_128.png"
   },
   "permissions": [
     "storage",
@@ -40,7 +40,7 @@
   "browser_action": {
     "default_title": "IMDb Content Warning Bar",
     "default_icon": {
-      "48": "assets/logos/imdb_banner.png"
+      "48": "assets/logos/imdb_banner_48.png"
     },
     "default_popup": "popup.html"
   },

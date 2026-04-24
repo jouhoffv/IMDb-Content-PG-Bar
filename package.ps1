@@ -20,7 +20,10 @@ $runtimeFiles = @(
   "options.html",
   "options.js",
   "options.css",
-  "assets/logos/imdb_banner.png"
+  "assets/logos/imdb_banner.png",
+  "assets/logos/imdb_banner_48.png",
+  "assets/logos/imdb_banner_96.png",
+  "assets/logos/imdb_banner_128.png"
 )
 
 if (Test-Path $stageDir) {

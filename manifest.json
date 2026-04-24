@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "IMDb Content Warning Bar",
+  "name": "IMDb Content PG Bar",
   "version": "1.2.0",
   "description": "Shows a color-coded Parents Guide bar on IMDb title pages.",
   "author": "Victor",
@@ -19,7 +19,7 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "imdb-content-warning-bar@example.com",
+      "id": "imdb-content-pg-bar@example.com",
       "data_collection_permissions": {
         "required": [
           "browsingActivity",
@@ -38,7 +38,7 @@
     ]
   },
   "browser_action": {
-    "default_title": "IMDb Content Warning Bar",
+    "default_title": "IMDb Content PG Bar",
     "default_icon": {
       "48": "assets/logos/imdb_banner_48.png"
     },

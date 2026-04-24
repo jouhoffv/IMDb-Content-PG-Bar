@@ -1,5 +1,5 @@
 (async function init() {
-  const BAR_ID = "imdb-content-warning-bar";
+  const BAR_ID = "imdb-content-pg-bar";
   const TITLE_CACHE_KEY = "titleRatingCache";
   const MAX_CACHED_TITLES = 300;
   const guideTextCache = new Map();

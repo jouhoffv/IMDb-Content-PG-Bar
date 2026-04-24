@@ -1,4 +1,4 @@
-# IMDb Content Warning Bar
+# IMDb Content PG Bar
 
 Firefox extension for IMDb that shows a thin, color-coded bar at the top of a movie or TV show page based on selected Parents Guide categories.
 
@@ -37,7 +37,7 @@ You can also click the extension button in Firefox to:
 
 - quickly enable or disable the feature
 - change categories
-- see whether the current IMDb title triggered the warning bar
+- see whether the current IMDb title triggered the PG bar
 
 ## Notes
 
@@ -48,7 +48,7 @@ You can also click the extension button in Firefox to:
 
 - Runtime code is plain HTML, CSS, and JavaScript. There is no bundler, transpiler, or minification step.
 - The extension stores user settings and a small local cache of parsed title ratings in `browser.storage.local`.
-- The extension fetches the current title's IMDb Parents Guide page from `imdb.com` to evaluate the warning categories.
+- The extension fetches the current title's IMDb Parents Guide page from `imdb.com` to evaluate the selected categories.
 - The extension does not send analytics, telemetry, or third-party tracking data.
 - For AMO packaging, only the runtime files listed in `package.ps1` should be included.
 

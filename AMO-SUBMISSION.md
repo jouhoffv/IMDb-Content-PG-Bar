@@ -7,7 +7,7 @@
 - In the AMO listing, disclose that the extension:
   - runs on IMDb title pages
   - fetches the current title's IMDb Parents Guide page
-  - shows a color-coded warning bar
+  - shows a color-coded PG bar
 
 # Manual Test Notes
 

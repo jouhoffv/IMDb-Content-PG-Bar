@@ -8,7 +8,6 @@
   - runs on IMDb title pages
   - fetches the current title's IMDb Parents Guide page
   - shows a color-coded warning bar
-  - adds a matching glow around the native IMDb header logo when the bar is visible
 
 # Manual Test Notes
 
@@ -17,7 +16,6 @@
 - Verify the popup loads current settings and page state.
 - Verify the options page saves settings.
 - Verify the top bar color changes based on selected Parents Guide categories.
-- Verify the IMDb logo remains unchanged except for the outer glow while the bar is visible.
 - Verify non-title IMDb pages do not show the bar.
 
 # Data / Privacy Notes

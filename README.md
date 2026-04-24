@@ -17,7 +17,6 @@ Firefox extension for IMDb that shows a thin, color-coded bar at the top of a mo
   - green for `None` or `Mild`
   - yellow for `Moderate`
   - red for `Severe`
-- Adds a matching glow around the native IMDb header logo while the warning bar is visible.
 
 ## Install in Firefox
 

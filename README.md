@@ -1,6 +1,6 @@
 # IMDb Content Warning Bar
 
-Firefox extension for IMDb that shows a thin red bar at the top of a movie or TV show page when the title matches selected parental-guide categories.
+Firefox extension for IMDb that shows a thin, color-coded bar at the top of a movie or TV show page based on selected Parents Guide categories.
 
 ## What it does
 
@@ -17,6 +17,7 @@ Firefox extension for IMDb that shows a thin red bar at the top of a movie or TV
   - green for `None` or `Mild`
   - yellow for `Moderate`
   - red for `Severe`
+- Adds a matching glow around the native IMDb header logo while the warning bar is visible.
 
 ## Install in Firefox
 
@@ -43,3 +44,22 @@ You can also click the extension button in Firefox to:
 
 - The extension relies on IMDb's parental guide page content and wording.
 - If IMDb changes the page structure or category wording, matching rules may need adjustment.
+
+## Submission Notes
+
+- Runtime code is plain HTML, CSS, and JavaScript. There is no bundler, transpiler, or minification step.
+- The extension stores user settings and a small local cache of parsed title ratings in `browser.storage.local`.
+- The extension fetches the current title's IMDb Parents Guide page from `imdb.com` to evaluate the warning categories.
+- The extension does not send analytics, telemetry, or third-party tracking data.
+- For AMO packaging, only the runtime files listed in `package.ps1` should be included.
+
+## Build And Packaging
+
+- No build step is required.
+- To create a submission ZIP from the repo root, run:
+
+```powershell
+.\package.ps1
+```
+
+- The output ZIP is written to `dist/` with `manifest.json` at the archive root.

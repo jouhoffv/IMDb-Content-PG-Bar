@@ -1,13 +1,14 @@
 {
   "manifest_version": 2,
   "name": "IMDb Content Warning Bar",
-  "version": "1.1.1",
-  "description": "Color-codes IMDb title pages using Parents Guide ratings.",
+  "version": "1.2.0",
+  "description": "Shows a color-coded Parents Guide bar on IMDb title pages.",
   "author": "Victor",
   "homepage_url": "https://github.com/jouhoffv",
   "icons": {
     "48": "assets/logos/imdb_banner.png",
-    "96": "assets/logos/imdb_banner.png"
+    "96": "assets/logos/imdb_banner.png",
+    "128": "assets/logos/imdb_banner.png"
   },
   "permissions": [
     "storage",
@@ -21,10 +22,11 @@
       "id": "imdb-content-warning-bar@example.com",
       "data_collection_permissions": {
         "required": [
-          "none"
+          "browsingActivity",
+          "websiteContent"
         ]
       },
-      "strict_min_version": "109.0"
+      "strict_min_version": "140.0"
     }
   },
   "background": {

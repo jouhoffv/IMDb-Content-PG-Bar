@@ -1,15 +1,3 @@
-[class*="inline20"],
-[class*="responsive_wrapper"],
-[data-testid*="inline20"],
-[data-testid*="responsive-wrapper"],
-[id*="inline20"],
-.ipc-ad-slot,
-.advertisement,
-[aria-label="advertisement"] {
-  display: none !important;
-  visibility: hidden !important;
-}
-
 #imdb-content-warning-bar {
   position: fixed !important;
   top: 0 !important;

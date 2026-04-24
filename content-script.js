@@ -2,11 +2,12 @@
   const BAR_ID = "imdb-content-warning-bar";
   const TITLE_CACHE_KEY = "titleRatingCache";
   const MAX_CACHED_TITLES = 300;
-  const LOGO_STYLE_ID = "imdb-logo-replacement-style";
-  const LOGO_URLS = {
-    green: browser.runtime.getURL("assets/logos/Green.svg"),
-    yellow: browser.runtime.getURL("assets/logos/Yellow.svg"),
-    red: browser.runtime.getURL("assets/logos/Red.svg")
+  const LOGO_STYLE_ID = "imdb-logo-glow-style";
+  const guideTextCache = new Map();
+  const LOGO_GLOWS = {
+    green: "0 0 0 1px rgba(46, 160, 67, 0.24), 0 0 14px rgba(46, 160, 67, 0.5), 0 0 28px rgba(46, 160, 67, 0.28)",
+    yellow: "0 0 0 1px rgba(224, 161, 0, 0.26), 0 0 14px rgba(224, 161, 0, 0.56), 0 0 28px rgba(224, 161, 0, 0.3)",
+    red: "0 0 0 1px rgba(207, 34, 46, 0.3), 0 0 14px rgba(207, 34, 46, 0.62), 0 0 28px rgba(207, 34, 46, 0.34)"
   };
   const CATEGORY_ALIASES = {
     nudity: [
@@ -206,8 +207,8 @@
   });
 
   ensureBar();
-  ensureLogoReplacementStyles();
-  updateSiteLogo("red");
+  removeLegacyLogoArtifacts();
+  ensureLogoGlowStyles();
   attachObserver();
   await refreshIndicator();
 
@@ -331,19 +332,38 @@
   }
 
   async function loadGuideText(titleId) {
-    const url = `https://www.imdb.com/title/${titleId}/parentalguide/`;
-    const response = await fetch(url, {
-      credentials: "same-origin"
-    });
-
-    if (!response.ok) {
-      throw new Error(`Unable to fetch parental guide: ${response.status}`);
+    const cached = guideTextCache.get(titleId);
+    if (cached?.text) {
+      return cached.text;
     }
 
-    const html = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-    return normalizeText(doc.body?.innerText || "");
+    if (cached?.promise) {
+      return cached.promise;
+    }
+
+    const url = `https://www.imdb.com/title/${titleId}/parentalguide/`;
+    const request = (async () => {
+      const response = await fetch(url, {
+        credentials: "same-origin"
+      });
+
+      if (!response.ok) {
+        throw new Error(`Unable to fetch parental guide: ${response.status}`);
+      }
+
+      const html = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const text = normalizeText(doc.body?.innerText || "");
+      guideTextCache.set(titleId, { text });
+      return text;
+    })().catch((error) => {
+      guideTextCache.delete(titleId);
+      throw error;
+    });
+
+    guideTextCache.set(titleId, { promise: request });
+    return request;
   }
 
   function extractRatings(guideText) {
@@ -428,9 +448,7 @@
         });
       }
 
-      if (visible && color) {
-        updateSiteLogo(colorToLogoKey(color));
-      }
+      updateSiteLogo(visible && color ? colorToLogoKey(color) : null);
     }
   }
 
@@ -502,7 +520,7 @@
     setBarVisible(evaluation.shouldShow, evaluation.color, immediate);
   }
 
-  function ensureLogoReplacementStyles() {
+  function ensureLogoGlowStyles() {
     let style = document.getElementById(LOGO_STYLE_ID);
     if (!style) {
       style = document.createElement("style");
@@ -512,35 +530,101 @@
 
     style.textContent = `
       #home_img_holder {
+        --imdb-logo-glow: none;
         position: relative !important;
-        background-image: var(--imdb-custom-logo-url) !important;
-        background-repeat: no-repeat !important;
-        background-position: center !important;
-        background-size: contain !important;
+        border-radius: 6px !important;
+        background-image: none !important;
+        filter: none !important;
+      }
+
+      #home_img_holder,
+      #home_img_holder a {
+        transition: box-shadow 220ms ease !important;
       }
 
       #home_img_holder #home_img,
       #home_img_holder img,
       #home_img_holder svg,
       #home_img_holder picture {
-        opacity: 0 !important;
+        filter: none !important;
+        opacity: 1 !important;
+        transition: none !important;
+        position: relative !important;
+        z-index: 1 !important;
       }
 
-      #home_img_holder .alt_logo {
-        display: none !important;
+      #home_img_holder::after {
+        content: "" !important;
+        position: absolute !important;
+        inset: -3px !important;
+        border-radius: 8px !important;
+        box-shadow: var(--imdb-logo-glow) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        animation: imdb-logo-pulse 1.8s ease-in-out infinite !important;
+        transition: opacity 180ms ease, box-shadow 220ms ease !important;
+        z-index: 0 !important;
+      }
+
+      #home_img_holder[data-imdb-logo-glow="on"]::after {
+        opacity: 1 !important;
+      }
+
+      @keyframes imdb-logo-pulse {
+        0%, 100% {
+          transform: scale(1);
+          filter: brightness(1);
+        }
+        50% {
+          transform: scale(1.02);
+          filter: brightness(1.06);
+        }
       }
     `;
   }
 
-  function updateSiteLogo(colorKey) {
-    const logoKey = LOGO_URLS[colorKey] ? colorKey : "red";
+  function removeLegacyLogoArtifacts() {
+    const legacyStyle = document.getElementById("imdb-logo-color-style");
+    if (legacyStyle) {
+      legacyStyle.remove();
+    }
+
+    const oldReplacementStyle = document.getElementById("imdb-logo-replacement-style");
+    if (oldReplacementStyle) {
+      oldReplacementStyle.remove();
+    }
+
     const holder = document.getElementById("home_img_holder");
     if (!holder) {
       return;
     }
 
-    holder.style.setProperty("--imdb-custom-logo-url", `url("${LOGO_URLS[logoKey]}")`);
-    holder.style.setProperty("background-image", `url("${LOGO_URLS[logoKey]}")`, "important");
+    holder.style.removeProperty("--imdb-custom-logo-url");
+    holder.style.removeProperty("--imdb-logo-filter");
+    holder.style.removeProperty("background-image");
+    holder.style.removeProperty("filter");
+    holder.removeAttribute("data-imdb-logo-glow");
+
+    holder.querySelectorAll("#home_img, img, svg, picture").forEach((node) => {
+      node.style.removeProperty("filter");
+      node.style.removeProperty("opacity");
+    });
+  }
+
+  function updateSiteLogo(colorKey) {
+    const holder = document.getElementById("home_img_holder");
+    if (!holder) {
+      return;
+    }
+
+    if (!colorKey || !LOGO_GLOWS[colorKey]) {
+      holder.style.setProperty("--imdb-logo-glow", "none");
+      holder.removeAttribute("data-imdb-logo-glow");
+      return;
+    }
+
+    holder.style.setProperty("--imdb-logo-glow", LOGO_GLOWS[colorKey]);
+    holder.setAttribute("data-imdb-logo-glow", "on");
   }
 
   function colorToLogoKey(color) {

@@ -17,6 +17,7 @@ Firefox extension for IMDb that shows a thin, color-coded bar at the top of a mo
   - green for `None` or `Mild`
   - yellow for `Moderate`
   - red for `Severe`
+- Adds a matching outer glow around the native IMDb logo area while the PG bar is visible.
 
 ## Install in Firefox
 
@@ -49,6 +50,7 @@ You can also click the extension button in Firefox to:
 - Runtime code is plain HTML, CSS, and JavaScript. There is no bundler, transpiler, or minification step.
 - The extension stores user settings and a small local cache of parsed title ratings in `browser.storage.local`.
 - The extension fetches the current title's IMDb Parents Guide page from `imdb.com` to evaluate the selected categories.
+- The extension adds a color-matched outer glow around the native IMDb logo area when the PG bar is visible.
 - The extension does not send analytics, telemetry, or third-party tracking data.
 - For AMO packaging, only the runtime files listed in `package.ps1` should be included.
 

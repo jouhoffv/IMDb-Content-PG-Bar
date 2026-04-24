@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "IMDb Content PG Bar",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Shows a color-coded Parents Guide bar on IMDb title pages.",
   "author": "Victor",
   "homepage_url": "https://github.com/jouhoffv",

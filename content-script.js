@@ -2,7 +2,13 @@
   const BAR_ID = "imdb-content-pg-bar";
   const TITLE_CACHE_KEY = "titleRatingCache";
   const MAX_CACHED_TITLES = 300;
+  const LOGO_STYLE_ID = "imdb-logo-glow-style";
   const guideTextCache = new Map();
+  const LOGO_GLOWS = {
+    green: "0 0 0 1px rgba(46, 160, 67, 0.24), 0 0 14px rgba(46, 160, 67, 0.5), 0 0 28px rgba(46, 160, 67, 0.28)",
+    yellow: "0 0 0 1px rgba(224, 161, 0, 0.26), 0 0 14px rgba(224, 161, 0, 0.56), 0 0 28px rgba(224, 161, 0, 0.3)",
+    red: "0 0 0 1px rgba(207, 34, 46, 0.3), 0 0 14px rgba(207, 34, 46, 0.62), 0 0 28px rgba(207, 34, 46, 0.34)"
+  };
   const CATEGORY_ALIASES = {
     nudity: [
       "sex & nudity",
@@ -201,6 +207,8 @@
   });
 
   ensureBar();
+  removeLegacyLogoArtifacts();
+  ensureLogoGlowStyles();
   attachObserver();
   await refreshIndicator();
 
@@ -439,7 +447,7 @@
           bar.style.removeProperty("transition");
         });
       }
-
+      updateSiteLogo(visible && color ? colorToLogoKey(color) : null);
     }
   }
 
@@ -509,6 +517,125 @@
       ratingSources: evaluation.ratingSources
     };
     setBarVisible(evaluation.shouldShow, evaluation.color, immediate);
+  }
+
+  function ensureLogoGlowStyles() {
+    let style = document.getElementById(LOGO_STYLE_ID);
+    if (!style) {
+      style = document.createElement("style");
+      style.id = LOGO_STYLE_ID;
+      (document.head || document.documentElement).appendChild(style);
+    }
+
+    style.textContent = `
+      #home_img_holder {
+        --imdb-logo-glow: none;
+        position: relative !important;
+        border-radius: 6px !important;
+        background-image: none !important;
+        filter: none !important;
+      }
+
+      #home_img_holder,
+      #home_img_holder a {
+        transition: box-shadow 220ms ease !important;
+      }
+
+      #home_img_holder #home_img,
+      #home_img_holder img,
+      #home_img_holder svg,
+      #home_img_holder picture {
+        filter: none !important;
+        opacity: 1 !important;
+        transition: none !important;
+        position: relative !important;
+        z-index: 1 !important;
+      }
+
+      #home_img_holder::after {
+        content: "" !important;
+        position: absolute !important;
+        inset: -3px !important;
+        border-radius: 8px !important;
+        box-shadow: var(--imdb-logo-glow) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        animation: imdb-logo-pulse 1.8s ease-in-out infinite !important;
+        transition: opacity 180ms ease, box-shadow 220ms ease !important;
+        z-index: 0 !important;
+      }
+
+      #home_img_holder[data-imdb-logo-glow="on"]::after {
+        opacity: 1 !important;
+      }
+
+      @keyframes imdb-logo-pulse {
+        0%, 100% {
+          transform: scale(1);
+          filter: brightness(1);
+        }
+        50% {
+          transform: scale(1.02);
+          filter: brightness(1.06);
+        }
+      }
+    `;
+  }
+
+  function removeLegacyLogoArtifacts() {
+    const legacyStyle = document.getElementById("imdb-logo-color-style");
+    if (legacyStyle) {
+      legacyStyle.remove();
+    }
+
+    const oldReplacementStyle = document.getElementById("imdb-logo-replacement-style");
+    if (oldReplacementStyle) {
+      oldReplacementStyle.remove();
+    }
+
+    const holder = document.getElementById("home_img_holder");
+    if (!holder) {
+      return;
+    }
+
+    holder.style.removeProperty("--imdb-custom-logo-url");
+    holder.style.removeProperty("--imdb-logo-filter");
+    holder.style.removeProperty("background-image");
+    holder.style.removeProperty("filter");
+    holder.removeAttribute("data-imdb-logo-glow");
+
+    holder.querySelectorAll("#home_img, img, svg, picture").forEach((node) => {
+      node.style.removeProperty("filter");
+      node.style.removeProperty("opacity");
+    });
+  }
+
+  function updateSiteLogo(colorKey) {
+    const holder = document.getElementById("home_img_holder");
+    if (!holder) {
+      return;
+    }
+
+    if (!colorKey || !LOGO_GLOWS[colorKey]) {
+      holder.style.setProperty("--imdb-logo-glow", "none");
+      holder.removeAttribute("data-imdb-logo-glow");
+      return;
+    }
+
+    holder.style.setProperty("--imdb-logo-glow", LOGO_GLOWS[colorKey]);
+    holder.setAttribute("data-imdb-logo-glow", "on");
+  }
+
+  function colorToLogoKey(color) {
+    switch ((color || "").toLowerCase()) {
+      case "#2ea043":
+        return "green";
+      case "#e0a100":
+        return "yellow";
+      case "#cf222e":
+      default:
+        return "red";
+    }
   }
 
   async function getCachedRatings(titleId) {

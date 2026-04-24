@@ -8,6 +8,7 @@
   - runs on IMDb title pages
   - fetches the current title's IMDb Parents Guide page
   - shows a color-coded PG bar
+  - adds a matching outer glow around the native IMDb logo area while the bar is visible
 
 # Manual Test Notes
 
@@ -16,10 +17,12 @@
 - Verify the popup loads current settings and page state.
 - Verify the options page saves settings.
 - Verify the top bar color changes based on selected Parents Guide categories.
+- Verify the native IMDb logo stays unchanged and only the outer glow appears around its container.
 - Verify non-title IMDb pages do not show the bar.
 
 # Data / Privacy Notes
 
 - Uses `browser.storage.local` for settings and a local rating cache.
 - Fetches the current title's IMDb Parents Guide page from `imdb.com`.
+- Applies an on-page visual glow effect around the existing IMDb logo area while the PG bar is shown.
 - Does not include analytics, telemetry, ads, or third-party tracking.

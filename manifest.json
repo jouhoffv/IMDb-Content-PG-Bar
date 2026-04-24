@@ -19,7 +19,7 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "imdb-content-pg-bar@example.com",
+      "id": "imdb-content-warning-bar@example.com",
       "data_collection_permissions": {
         "required": [
           "browsingActivity",
